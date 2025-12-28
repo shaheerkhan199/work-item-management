@@ -31,8 +31,9 @@ export function UsersManagement() {
       try {
         const data = await usersAPI.getAllUsers()
         setUsers(data)
-      } catch (err) {
-        setError("Failed to load users")
+      } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || "Failed to load users"
+        setError(errorMessage)
         console.error(err)
       } finally {
         setIsLoadingUsers(false)

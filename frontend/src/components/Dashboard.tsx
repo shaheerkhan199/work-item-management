@@ -23,8 +23,9 @@ export function Dashboard() {
       try {
         const response = await client.get<WorkItem[]>("/work-items")
         setWorkItems(response.data)
-      } catch (err) {
-        setError("Failed to load work items")
+      } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || "Failed to load work items"
+        setError(errorMessage)
         console.error(err)
       } finally {
         setIsLoadingItems(false)

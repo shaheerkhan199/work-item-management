@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { type FormEvent, useState, useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { authAPI } from "../api/auth"
 import { useAuth } from "../context/AuthContext"
 
@@ -9,7 +9,16 @@ export function LoginForm() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setUser, setToken } = useAuth()
+
+  useEffect(() => {
+    // Check for error message in URL params (from redirects)
+    const errorParam = searchParams.get("error")
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

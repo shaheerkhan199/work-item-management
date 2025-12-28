@@ -34,8 +34,9 @@ export function WorkItemDetail() {
         ])
         setWorkItem(itemResponse.data)
         setHistory(historyResponse.data)
-      } catch (err) {
-        setError("Failed to load work item")
+      } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || "Failed to load work item"
+        setError(errorMessage)
         console.error(err)
       } finally {
         setItemLoading(false)

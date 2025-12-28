@@ -29,8 +29,9 @@ export function ActivityHistory() {
           data = await historyAPI.getUserActivity(50)
         }
         setHistory(data)
-      } catch (err) {
-        setError("Failed to load activity history")
+      } catch (err: any) {
+        const errorMessage = err?.response?.data?.message || "Failed to load activity history"
+        setError(errorMessage)
         console.error(err)
       } finally {
         setIsLoadingHistory(false)
