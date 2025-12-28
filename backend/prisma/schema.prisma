@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users table
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String     // bcrypt hashed
+  firstName String
+  lastName  String
+  role      UserRole   @default(VIEWER)
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  workItems     WorkItem[]
+  historyEvents HistoryEvent[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+// Work Items table
+model WorkItem {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  currentState    WorkItemState @default(CREATED)
+  isBlocked       Boolean        @default(false)
+  blockedReason   String?
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  historyEvents HistoryEvent[]
+
+  @@index([createdById])
+  @@index([currentState])
+  @@map("work_items")
+}
+
+enum WorkItemState {
+  CREATED
+  IN_PROGRESS
+  IN_REVIEW
+  REWORK
+  COMPLETED
+}
+
+// History / Audit Trail
+model HistoryEvent {
+  id              String   @id @default(cuid())
+  workItemId      String
+  workItem        WorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+
+  eventType       HistoryEventType
+  previousState   WorkItemState?
+  newState        WorkItemState?
+  details         String?  // JSON string for additional context
+
+  performedById   String
+  performedBy     User     @relation(fields: [performedById], references: [id])
+
+  createdAt       DateTime @default(now())
+
+  @@index([workItemId])
+  @@index([performedById])
+  @@index([eventType])
+  @@map("history_events")
+}
+
+enum HistoryEventType {
+  CREATED
+  STATE_CHANGED
+  BLOCKED
+  UNBLOCKED
+  REWORK_INITIATED
+  UPDATED
+}
