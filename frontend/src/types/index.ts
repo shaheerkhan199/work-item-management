@@ -8,6 +8,8 @@ export interface User {
   firstName: string
   lastName: string
   role: UserRole
+  active?: boolean
+  createdAt?: string
 }
 
 export interface WorkItem {
@@ -25,6 +27,11 @@ export interface WorkItem {
 export interface HistoryEvent {
   id: string
   workItemId: string
+  workItem?: {
+    id: string
+    title: string
+    currentState: WorkItemState
+  }
   eventType: HistoryEventType
   previousState?: WorkItemState
   newState?: WorkItemState

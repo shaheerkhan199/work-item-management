@@ -5,6 +5,8 @@ import { RegisterForm } from "./components/RegisterForm"
 import { Dashboard } from "./components/Dashboard"
 import { WorkItemDetail } from "./components/WorkItemDetail"
 import { CreateWorkItem } from "./components/CreateWorkItem"
+import { UsersManagement } from "./components/UsersManagement"
+import { ActivityHistory } from "./components/ActivityHistory"
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/work-items/create" element={<CreateWorkItem />} />
           <Route path="/work-items/:id" element={<WorkItemDetail />} />
+          <Route path="/users" element={<UsersManagement />} />
+          <Route path="/activity" element={<ActivityHistory />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
