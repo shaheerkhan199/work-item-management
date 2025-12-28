@@ -65,7 +65,7 @@ export function WorkItemDetail() {
     )
   }
 
-  const canTransition = user && (user.role === "ADMIN" || user.role === "OPERATOR") && !workItem.isBlocked
+  const canTransition = user && !workItem.isBlocked && (user.role === "ADMIN" || workItem.createdBy.id === user.id)
   const canBlock = user && (user.role === "ADMIN" || user.role === "OPERATOR")
   const isCompleted = workItem.currentState === "COMPLETED"
 

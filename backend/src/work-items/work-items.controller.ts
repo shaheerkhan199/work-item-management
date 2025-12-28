@@ -40,7 +40,7 @@ export class WorkItemsController {
   }
 
   @Post(":id/transition")
-  @Roles("ADMIN", "OPERATOR")
+  @Roles("ADMIN", "OPERATOR", "VIEWER")
   transitionState(@Param("id") id: string, @Body() transitionDto: TransitionStateDto, @CurrentUser() user: JwtPayload) {
     return this.workItemsService.transitionState(id, transitionDto, user.sub, user.role)
   }

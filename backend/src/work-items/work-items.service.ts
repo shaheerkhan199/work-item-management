@@ -148,9 +148,9 @@ export class WorkItemsService {
     // Authorization check
     const workItem = await this.findById(id, userId, userRole)
 
-    // Only ADMIN and OPERATOR can transition states
-    if (userRole === "VIEWER") {
-      throw new ForbiddenException("Viewers cannot change work item states")
+    // Users can only transition states of their own work items (unless ADMIN)
+    if (userRole !== "ADMIN" && workItem.createdById !== userId) {
+      throw new ForbiddenException("You can only change the state of your own work items")
     }
 
     // Check if work item is blocked

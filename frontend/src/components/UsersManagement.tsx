@@ -156,8 +156,9 @@ export function UsersManagement() {
                       <select
                         value={u.role}
                         onChange={(e) => handleRoleUpdate(u.id, e.target.value as UserRole)}
-                        disabled={updatingUserId === u.id}
-                        className="px-3 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                        disabled={updatingUserId === u.id || u.id === user?.id}
+                        className="px-3 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={u.id === user?.id ? "You cannot change your own role" : ""}
                       >
                         <option value="VIEWER">VIEWER</option>
                         <option value="OPERATOR">OPERATOR</option>
