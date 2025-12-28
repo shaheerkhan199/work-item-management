@@ -11,7 +11,6 @@
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
     "axios": "^1.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,7 +23,10 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.23",
     "eslint": "^8.55.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
     "typescript": "^5.3.3",
     "vite": "^5.0.7"
   }
