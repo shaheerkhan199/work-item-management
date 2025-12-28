@@ -181,9 +181,25 @@ export function UsersManagement() {
                         className="px-3 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         title={u.id === user?.id ? "You cannot change your own status" : ""}
                       >
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                        <option value="SUSPENDED">SUSPENDED</option>
+                        {/* New/INACTIVE users: Can only be set to ACTIVE or kept as INACTIVE */}
+                        {(!u.status || u.status === "INACTIVE") ? (
+                          <>
+                            <option value="INACTIVE">INACTIVE</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                          </>
+                        ) : u.status === "ACTIVE" ? (
+                          /* ACTIVE users: Can only be set to ACTIVE or SUSPENDED (cannot go back to INACTIVE) */
+                          <>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="SUSPENDED">SUSPENDED</option>
+                          </>
+                        ) : (
+                          /* SUSPENDED users: Can be set back to ACTIVE or kept as SUSPENDED */
+                          <>
+                            <option value="SUSPENDED">SUSPENDED</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                          </>
+                        )}
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
