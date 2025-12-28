@@ -1,5 +1,3 @@
-"use client"
-
 import { type FormEvent, useState } from "react"
 import type { WorkItem } from "../types"
 import client from "../api/client"
