@@ -17,7 +17,7 @@ export class WorkItemsController {
 
   @Post()
   @Roles("ADMIN", "OPERATOR", "VIEWER")
-  create(createDto: CreateWorkItemDto, @CurrentUser() user: JwtPayload) {
+  create(@Body() createDto: CreateWorkItemDto, @CurrentUser() user: JwtPayload) {
     return this.workItemsService.create(createDto, user.sub)
   }
 
@@ -35,19 +35,19 @@ export class WorkItemsController {
 
   @Patch(":id")
   @Roles("ADMIN", "OPERATOR")
-  update(@Param("id") id: string, updateDto: UpdateWorkItemDto, @CurrentUser() user: JwtPayload) {
+  update(@Param("id") id: string, @Body() updateDto: UpdateWorkItemDto, @CurrentUser() user: JwtPayload) {
     return this.workItemsService.update(id, updateDto, user.sub, user.role)
   }
 
   @Post(":id/transition")
   @Roles("ADMIN", "OPERATOR")
-  transitionState(@Param("id") id: string, transitionDto: TransitionStateDto, @CurrentUser() user: JwtPayload) {
+  transitionState(@Param("id") id: string, @Body() transitionDto: TransitionStateDto, @CurrentUser() user: JwtPayload) {
     return this.workItemsService.transitionState(id, transitionDto, user.sub, user.role)
   }
 
   @Post(":id/block")
   @Roles("ADMIN", "OPERATOR")
-  block(@Param("id") id: string, blockDto: BlockWorkItemDto, @CurrentUser() user: JwtPayload) {
+  block(@Param("id") id: string, @Body() blockDto: BlockWorkItemDto, @CurrentUser() user: JwtPayload) {
     return this.workItemsService.blockWorkItem(id, blockDto, user.sub, user.role)
   }
 
