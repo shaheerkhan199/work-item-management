@@ -9,12 +9,16 @@ This system manages "Work Items" that move through a defined lifecycle (CREATED 
 **Key Features:**
 - JWT-based authentication with bcrypt password hashing
 - Role-based access control (Admin, Operator, Viewer)
+- User status management (Active, Inactive, Suspended) with admin approval workflow
 - Strict lifecycle state machine with allowed transitions
-- Work item blocking/unblocking with justification
+- Work item blocking/unblocking with justification (Operator/Admin only)
+- Users can change status of their own work items (JIRA-like behavior)
 - Explicit rework support
 - Complete audit trail with full traceability
 - Server-side enforcement of all business rules
 - React frontend with real-time state management
+- Admin user management interface
+- Activity history tracking for all users
 
 ## Tech Stack
 
@@ -28,9 +32,10 @@ This system manages "Work Items" that move through a defined lifecycle (CREATED 
 
 **Frontend:**
 - React 18
+- Vite (build tool)
 - React Router v6
 - Axios for API calls
-- Tailwind CSS
+- Tailwind CSS v3
 - TypeScript
 
 ## Architecture
@@ -55,11 +60,32 @@ backend/
 frontend/
 ├── src/
 │   ├── components/         # React components
+│   │   ├── LoginForm.tsx
+│   │   ├── RegisterForm.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── WorkItemDetail.tsx
+│   │   ├── CreateWorkItem.tsx
+│   │   ├── UsersManagement.tsx (Admin only)
+│   │   ├── ActivityHistory.tsx
+│   │   └── Header.tsx
 │   ├── context/            # Auth context & state
 │   ├── api/                # API client & endpoints
+│   │   ├── client.ts
+│   │   ├── auth.ts
+│   │   ├── users.ts
+│   │   └── history.ts
 │   ├── types/              # TypeScript interfaces
 │   └── App.tsx             # Main router
 ```
+
+### Frontend Routes
+- `/login` - User login page
+- `/register` - User registration page
+- `/dashboard` - Main dashboard showing work items
+- `/work-items/create` - Create new work item
+- `/work-items/:id` - View and manage work item details
+- `/users` - Users Management (Admin only)
+- `/activity` - Activity History page
 
 ### Database Schema
 
@@ -69,7 +95,7 @@ frontend/
 - `password`: Bcrypt hashed password
 - `firstName`, `lastName`: User name fields
 - `role`: UserRole enum (ADMIN, OPERATOR, VIEWER)
-- `active`: Boolean flag for account status
+- `status`: UserStatus enum (ACTIVE, INACTIVE, SUSPENDED)
 - `createdAt`, `updatedAt`: Timestamps
 
 **WorkItems Table**
@@ -105,54 +131,69 @@ CREATED
 
 **Rules:**
 - Blocked work items cannot transition to any other state
-- Only ADMIN and OPERATOR can initiate state transitions
+- Users can change the status of work items they created (regardless of role)
+- ADMIN can change status of any work item
+- Only ADMIN and OPERATOR can block/unblock work items
 - Each transition is recorded with optional reason
 - Rework is an explicit action that changes state to REWORK
 - COMPLETED is a terminal state (no further transitions allowed)
 
 ## Authorization Model
 
+### User Status Management
+- **INACTIVE**: New users register as INACTIVE and cannot login until approved by admin
+- **ACTIVE**: Approved users can login and perform all allowed actions
+- **SUSPENDED**: Suspended users cannot login or perform any actions
+- Only ADMIN can change user status
+- Status transition rules:
+  - INACTIVE users can only be set to ACTIVE (cannot be suspended)
+  - ACTIVE users can be set to ACTIVE or SUSPENDED (cannot go back to INACTIVE)
+  - SUSPENDED users can be reactivated to ACTIVE
+
 ### Admin
 - Full access to all work items
-- Can manage all users and assign roles
+- Can manage all users (assign roles and change status)
 - Can view complete system history
 - Can create, update, transition, block/unblock items
 - Can view all work items regardless of creator
+- Cannot change their own role or status
 
 ### Operator
 - Can create and manage work items they created
-- Can transition states and block/unblock their items
+- Can transition states of their own work items
+- Can block/unblock any work item
 - Can view their own items and history
 - Cannot manage other users
 
 ### Viewer
-- Read-only access to items they created
-- Cannot create new items
-- Cannot modify or transition items
-- Can view item history
+- Can create work items
+- Can change status of work items they created (JIRA-like behavior)
+- Cannot block/unblock work items
+- Can view their own items and history
+- Cannot manage other users
 
 ## Setup Instructions
 
 ### Prerequisites
 - Node.js 18+
 - PostgreSQL 12+
-- npm or yarn
+- pnpm (recommended) or npm
 
 ### Backend Setup
 
-1. **Clone and navigate to backend:**
+1. **Navigate to backend directory:**
    ```bash
    cd backend
-   npm install
    ```
 
-2. **Create `.env` file:**
+2. **Install dependencies:**
    ```bash
-   cp .env.example .env
+   pnpm install
    ```
 
-3. **Configure `.env`:**
-   ```
+3. **Create `.env` file:**
+   ```bash
+   # Create .env file with the following content:
    DATABASE_URL="postgresql://user:password@localhost:5432/work_item_db"
    JWT_SECRET="your-super-secret-jwt-key-change-in-production"
    NODE_ENV="development"
@@ -164,39 +205,48 @@ CREATED
    createdb work_item_db
    ```
 
-5. **Run Prisma migrations:**
+5. **Generate Prisma client:**
    ```bash
-   npm run db:migrate
+   pnpm prisma generate
    ```
 
-6. **Start backend server:**
+6. **Run Prisma migrations:**
    ```bash
-   npm run start:dev
+   pnpm prisma migrate dev
+   ```
+   
+   Note: This will create the database schema with UserStatus enum (ACTIVE, INACTIVE, SUSPENDED)
+
+7. **Start backend server:**
+   ```bash
+   pnpm run start:dev
    ```
 
 Backend will run on `http://localhost:3001`
 
 ### Frontend Setup
 
-1. **Clone and navigate to frontend:**
+1. **Navigate to frontend directory:**
    ```bash
    cd frontend
-   npm install
    ```
 
-2. **Create `.env` file:**
+2. **Install dependencies:**
    ```bash
-   cp .env.example .env
+   pnpm install
    ```
 
-3. **Configure `.env`:**
-   ```
+3. **Create `.env` file (optional):**
+   ```bash
+   # Create .env file if you need to override API URL:
    VITE_API_URL=http://localhost:3001
    ```
+   
+   Note: The default API URL is `http://localhost:3001` and is configured in `src/api/client.ts`
 
 4. **Start frontend development server:**
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 Frontend will run on `http://localhost:3000`
@@ -206,16 +256,18 @@ Frontend will run on `http://localhost:3000`
 ### Terminal 1 - Backend
 ```bash
 cd backend
-npm run start:dev
+pnpm run start:dev
 ```
 
 ### Terminal 2 - Frontend
 ```bash
 cd frontend
-npm run dev
+pnpm run dev
 ```
 
 Visit `http://localhost:3000` in your browser.
+
+**Note:** Make sure PostgreSQL is running and the database is accessible before starting the backend.
 
 ## API Endpoints
 
@@ -227,6 +279,7 @@ Visit `http://localhost:3000` in your browser.
 - `GET /users/me` - Get current user info
 - `GET /users` - Get all users (Admin only)
 - `PATCH /users/:id/role` - Update user role (Admin only)
+- `PATCH /users/:id/status` - Update user status (Admin only)
 
 ### Work Items
 - `POST /work-items` - Create work item
@@ -246,65 +299,90 @@ Visit `http://localhost:3000` in your browser.
 ## Key Design Decisions
 
 ### 1. Server-Side Enforcement
-All business rules (state transitions, blocking, authorization) are enforced server-side. Frontend UI is disabled for invalid actions but clients cannot bypass validation.
+All business rules (state transitions, blocking, authorization, user status) are enforced server-side. Frontend UI is disabled for invalid actions but clients cannot bypass validation.
 
-### 2. Immutable Audit Trail
+### 2. User Status Management
+- New users register as INACTIVE and require admin approval to become ACTIVE
+- ACTIVE users can be suspended by admin
+- SUSPENDED users are blocked from all actions via UserStatusGuard
+- Status changes follow strict rules: INACTIVE → ACTIVE only, ACTIVE → ACTIVE/SUSPENDED only
+
+### 3. Immutable Audit Trail
 History events are never modified or deleted. Each change creates a new record with timestamp, user, and details. This ensures compliance and traceability.
 
-### 3. JWT Authentication
-Stateless JWT tokens with 24-hour expiration. No session storage required. Tokens include user role for permission checks.
+### 4. JWT Authentication
+Stateless JWT tokens with 24-hour expiration. No session storage required. Tokens include user role for permission checks. Only ACTIVE users can login.
 
-### 4. Role-Based Access Control
+### 5. Role-Based Access Control
 Three roles with clear permission boundaries. Authorization checks on both endpoints and individual resources prevent unauthorized access.
 
-### 5. State Machine Pattern
+### 6. State Machine Pattern
 Explicit allowed transitions prevent invalid state combinations. Blocked items prevent all transitions, ensuring workflow consistency.
 
-### 6. Soft Authorization Pattern
+### 7. User-Owned Work Item Management
+Users can change the status of work items they created (JIRA-like behavior), regardless of role. This allows task owners to manage their own workflow while maintaining role-based restrictions for blocking/unblocking.
+
+### 8. Soft Authorization Pattern
 VIEWER/OPERATOR users can only access items they created (except ADMIN). This provides data isolation without row-level security complexity.
 
 ## Testing the System
 
 ### 1. Create Test Users
-- Register as Admin, Operator, and Viewer
-- Note: Initial users register as VIEWER, need manual role update via database
+- Register new users (they will be INACTIVE by default)
+- Login as admin and navigate to Users Management
+- Activate users and assign appropriate roles (ADMIN, OPERATOR, VIEWER)
+- Test that INACTIVE users cannot login
+- Test that SUSPENDED users cannot perform actions
 
-### 2. Create Work Items
+### 2. Test User Status Management
+- Register a new user (should be INACTIVE)
+- As admin, try to set INACTIVE user to SUSPENDED (should not be possible)
+- Activate the user (INACTIVE → ACTIVE)
+- As admin, verify you can now set them to SUSPENDED
+- Suspend the user and verify they cannot login or perform actions
+- Reactivate the user and verify they can login again
+
+### 3. Create Work Items
 - Create items as different users
 - Verify authorization boundaries
+- Test that users can change status of their own work items
 
-### 3. Test State Transitions
+### 4. Test State Transitions
 - Try invalid transitions (should be rejected)
 - Try transitions on blocked items (should fail)
+- Verify users can transition their own work items
 - Verify history recording
 
-### 4. Test Blocking
-- Block items and verify cannot transition
+### 5. Test Blocking
+- As OPERATOR/ADMIN, block items and verify cannot transition
 - Unblock and verify can transition again
+- Verify VIEWER cannot block/unblock items
 
-### 5. Verify History
+### 6. Verify History
 - Check that all actions are recorded
 - Verify audit trail shows correct sequence
+- Test Activity History page for individual and system-wide history
 
 ## Known Limitations
 
 1. **No Pagination**: List endpoints return all records. Production would need pagination.
 
-2. **Manual Role Assignment**: Initial users register as VIEWER. An admin endpoint to update roles exists but no UI. Update roles directly in database or via API.
+2. **No Soft Deletes**: Deleted records are hard deleted. Production should use soft deletes with timestamped `deletedAt`.
 
-3. **No Soft Deletes**: Deleted records are hard deleted. Production should use soft deletes with timestamped `deletedAt`.
+3. **No Rate Limiting**: No request rate limiting implemented. Production should add.
 
-4. **No Rate Limiting**: No request rate limiting implemented. Production should add.
+4. **Basic Error Messages**: Error messages are functional but not localized. Production would need i18n support.
 
-5. **Basic Error Messages**: Error messages are functional but not localized. Production would need i18n support.
+5. **No Email Verification**: Registration doesn't send verification emails. Production should implement.
 
-6. **No Email Verification**: Registration doesn't send verification emails. Production should implement.
+6. **Concurrent Update Conflicts**: No optimistic locking. Race conditions on simultaneous updates not handled.
 
-7. **Concurrent Update Conflicts**: No optimistic locking. Race conditions on simultaneous updates not handled.
+7. **No Admin Self-Protection**: Admin cannot change their own role or status (enforced in UI), but this should also be enforced server-side for additional security.
 
 ## Future Enhancements
 
 - Email verification and password reset flows
+- Email notifications when user status changes
 - Pagination and advanced filtering
 - Work item dependencies and critical path
 - Bulk operations
@@ -314,6 +392,8 @@ VIEWER/OPERATOR users can only access items they created (except ADMIN). This pr
 - Workflow templates
 - Integration with external systems
 - Metrics and reporting dashboard
+- Admin self-protection (prevent admin from changing own role/status server-side)
+- User activity monitoring and analytics
 
 ## Security Considerations
 
@@ -323,6 +403,9 @@ VIEWER/OPERATOR users can only access items they created (except ADMIN). This pr
 - **Input Validation**: All inputs validated with class-validator
 - **SQL Injection**: Protected via Prisma parameterized queries
 - **Authorization**: Server-side enforcement on all protected endpoints
+- **User Status Guard**: Prevents SUSPENDED and INACTIVE users from performing actions
+- **Admin Self-Protection**: Admin cannot change their own role or status (UI enforced)
+- **Error Handling**: Proper error messages without exposing sensitive information
 
 ## Troubleshooting
 
@@ -339,12 +422,25 @@ VIEWER/OPERATOR users can only access items they created (except ADMIN). This pr
 ### Login fails
 - Verify user was registered
 - Check email/password are correct
-- Check user account is active
+- Check user status is ACTIVE (INACTIVE and SUSPENDED users cannot login)
+- If user is INACTIVE, admin needs to activate them via Users Management page
+- If user is SUSPENDED, admin needs to reactivate them
 
 ### State transitions fail
 - Verify work item is not blocked
 - Check allowed transitions for current state
-- Verify user role allows action
+- Verify user owns the work item (or is ADMIN)
+- Check user status is ACTIVE (suspended users cannot perform actions)
+
+### User cannot login after registration
+- New users are INACTIVE by default
+- Admin must activate the user via Users Management page
+- Navigate to `/users` as admin and set user status to ACTIVE
+
+### Suspended user sees errors
+- Suspended users are automatically logged out when they try to perform actions
+- Error message will show "Your account has been suspended"
+- Admin needs to reactivate the user via Users Management page
 
 ## License
 
