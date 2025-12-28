@@ -1,8 +1,9 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common"
+import { Controller, Get, Query, UseGuards, Param } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
-import type { HistoryService } from "./history.service"
+import { HistoryService } from "./history.service"
 import { Roles } from "../common/decorators/roles.decorator"
 import { RolesGuard } from "../common/guards/roles.guard"
+import { CurrentUser } from "../common/decorators/current-user.decorator"
 import type { JwtPayload } from "../common/types"
 
 @Controller("history")
@@ -12,13 +13,13 @@ export class HistoryController {
 
   @Get("work-item/:workItemId")
   @Roles("ADMIN", "OPERATOR", "VIEWER")
-  getWorkItemHistory(workItemId: string, user: JwtPayload) {
+  getWorkItemHistory(@Param("workItemId") workItemId: string, @CurrentUser() user: JwtPayload) {
     return this.historyService.getWorkItemHistory(workItemId, user.sub, user.role)
   }
 
   @Get("user/me")
   @Roles("ADMIN", "OPERATOR", "VIEWER")
-  getUserActivity(@Query("limit") limit?: string, user: JwtPayload) {
+  getUserActivity(@CurrentUser() user: JwtPayload, @Query("limit") limit?: string) {
     const limitNum = limit ? Number.parseInt(limit, 10) : 50
     return this.historyService.getUserActivity(user.sub, limitNum)
   }

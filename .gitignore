@@ -3,7 +3,9 @@
 # dependencies
 /node_modules
 backend/node_modules
+backend/dist
 frontend/node_modules
+frontend/dist
 # next.js
 /.next/
 /out/

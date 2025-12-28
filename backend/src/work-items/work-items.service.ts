@@ -1,10 +1,10 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
-import type { HistoryService } from "../history/history.service"
-import type { CreateWorkItemDto } from "./dto/create-work-item.dto"
-import type { UpdateWorkItemDto } from "./dto/update-work-item.dto"
-import type { TransitionStateDto } from "./dto/transition-state.dto"
-import type { BlockWorkItemDto } from "./dto/block-work-item.dto"
+import { PrismaService } from "../prisma/prisma.service"
+import { HistoryService } from "../history/history.service"
+import { CreateWorkItemDto } from "./dto/create-work-item.dto"
+import { UpdateWorkItemDto } from "./dto/update-work-item.dto"
+import { TransitionStateDto } from "./dto/transition-state.dto"
+import { BlockWorkItemDto } from "./dto/block-work-item.dto"
 import type { WorkItemState, UserRole } from "../common/types"
 
 // Define allowed state transitions

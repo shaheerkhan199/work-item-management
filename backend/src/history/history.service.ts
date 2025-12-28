@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
-import type { RecordEventDto } from "./dto/record-event.dto"
+import { PrismaService } from "../prisma/prisma.service"
+import { RecordEventDto } from "./dto/record-event.dto"
 import type { UserRole } from "../common/types"
 
 @Injectable()

@@ -3,7 +3,7 @@ import { IsString, MinLength, IsOptional } from "class-validator"
 export class CreateWorkItemDto {
   @IsString()
   @MinLength(1)
-  title: string
+  title!: string
 
   @IsOptional()
   @IsString()

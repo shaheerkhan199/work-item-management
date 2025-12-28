@@ -1,11 +1,11 @@
 import type { HistoryEventType, WorkItemState } from "../../common/types"
 
 export class RecordEventDto {
-  workItemId: string
+  workItemId!: string
 
-  eventType: HistoryEventType
+  eventType!: HistoryEventType
 
-  performedById: string
+  performedById!: string
 
   previousState?: WorkItemState
 

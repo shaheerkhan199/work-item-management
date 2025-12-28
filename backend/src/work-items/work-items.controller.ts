@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch, UseGuards } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
-import type { WorkItemsService } from "./work-items.service"
+import { WorkItemsService } from "./work-items.service"
 import { Roles } from "../common/decorators/roles.decorator"
 import { RolesGuard } from "../common/guards/roles.guard"
 import { CurrentUser } from "../common/decorators/current-user.decorator"
-import type { CreateWorkItemDto } from "./dto/create-work-item.dto"
-import type { UpdateWorkItemDto } from "./dto/update-work-item.dto"
-import type { TransitionStateDto } from "./dto/transition-state.dto"
-import type { BlockWorkItemDto } from "./dto/block-work-item.dto"
+import { CreateWorkItemDto } from "./dto/create-work-item.dto"
+import { UpdateWorkItemDto } from "./dto/update-work-item.dto"
+import { TransitionStateDto } from "./dto/transition-state.dto"
+import { BlockWorkItemDto } from "./dto/block-work-item.dto"
 import type { JwtPayload } from "../common/types"
 
 @Controller("work-items")

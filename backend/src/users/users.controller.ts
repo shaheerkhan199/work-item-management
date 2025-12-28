@@ -1,8 +1,9 @@
 import { Controller, Get, Param, Patch, Body, UseGuards } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
-import type { UsersService } from "./users.service"
+import { UsersService } from "./users.service"
 import { Roles } from "../common/decorators/roles.decorator"
 import { RolesGuard } from "../common/guards/roles.guard"
+import { CurrentUser } from "../common/decorators/current-user.decorator"
 import type { JwtPayload } from "../common/types"
 
 @Controller("users")
@@ -12,7 +13,7 @@ export class UsersController {
 
   @Get("me")
   @Roles("ADMIN", "OPERATOR", "VIEWER")
-  getCurrentUser(user: JwtPayload) {
+  getCurrentUser(@CurrentUser() user: JwtPayload) {
     return this.usersService.findById(user.sub)
   }
 
