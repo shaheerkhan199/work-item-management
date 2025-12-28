@@ -22,8 +22,15 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials")
     }
 
-    if (!user.active) {
-      throw new UnauthorizedException("User account is inactive")
+    // Only ACTIVE users can login
+    if (user.status !== "ACTIVE") {
+      if (user.status === "INACTIVE") {
+        throw new UnauthorizedException("Your account is pending approval. Please contact an administrator.")
+      }
+      if (user.status === "SUSPENDED") {
+        throw new UnauthorizedException("Your account has been suspended. Please contact an administrator.")
+      }
+      throw new UnauthorizedException("User account is not active")
     }
 
     return user

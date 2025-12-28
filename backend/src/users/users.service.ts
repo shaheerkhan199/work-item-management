@@ -2,7 +2,7 @@ import { Injectable, ConflictException } from "@nestjs/common"
 import * as bcrypt from "bcrypt"
 import { PrismaService } from "../prisma/prisma.service"
 import { RegisterDto } from "../auth/dto/register.dto"
-import type { UserRole } from "../common/types"
+import type { UserRole, UserStatus } from "../common/types"
 
 @Injectable()
 export class UsersService {
@@ -26,6 +26,7 @@ export class UsersService {
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
         role: "VIEWER" as UserRole, // Default role for new users
+        status: "INACTIVE" as UserStatus, // New users are inactive until approved by admin
       },
     })
   }
@@ -50,7 +51,7 @@ export class UsersService {
         firstName: true,
         lastName: true,
         role: true,
-        active: true,
+        status: true,
         createdAt: true,
       },
     })
@@ -63,10 +64,10 @@ export class UsersService {
     })
   }
 
-  async deactivateUser(id: string) {
+  async updateStatus(id: string, status: UserStatus) {
     return this.prisma.user.update({
       where: { id },
-      data: { active: false },
+      data: { status },
     })
   }
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { usersAPI } from "../api/users"
-import type { User, UserRole } from "../types"
+import type { User, UserRole, UserStatus } from "../types"
 import { Header } from "./Header"
 
 export function UsersManagement() {
@@ -12,6 +12,7 @@ export function UsersManagement() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true)
   const [error, setError] = useState("")
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
+  const [updatingStatusUserId, setUpdatingStatusUserId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -54,6 +55,20 @@ export function UsersManagement() {
       console.error(err)
     } finally {
       setUpdatingUserId(null)
+    }
+  }
+
+  const handleStatusUpdate = async (userId: string, newStatus: UserStatus) => {
+    setUpdatingStatusUserId(userId)
+    setError("")
+    try {
+      const updatedUser = await usersAPI.updateUserStatus(userId, newStatus)
+      setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)))
+    } catch (err) {
+      setError("Failed to update user status")
+      console.error(err)
+    } finally {
+      setUpdatingStatusUserId(null)
     }
   }
 
@@ -106,14 +121,17 @@ export function UsersManagement() {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Actions
+                  Change Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Change Role
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-200">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-slate-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-slate-500">
                     No users found
                   </td>
                 </tr>
@@ -144,13 +162,28 @@ export function UsersManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          u.active !== false
+                          u.status === "ACTIVE"
                             ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            : u.status === "SUSPENDED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {u.active !== false ? "Active" : "Inactive"}
+                        {u.status || "INACTIVE"}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <select
+                        value={u.status || "INACTIVE"}
+                        onChange={(e) => handleStatusUpdate(u.id, e.target.value as UserStatus)}
+                        disabled={updatingStatusUserId === u.id || u.id === user?.id}
+                        className="px-3 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={u.id === user?.id ? "You cannot change your own status" : ""}
+                      >
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                        <option value="SUSPENDED">SUSPENDED</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <select

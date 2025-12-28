@@ -3,6 +3,7 @@ import { AuthGuard } from "@nestjs/passport"
 import { WorkItemsService } from "./work-items.service"
 import { Roles } from "../common/decorators/roles.decorator"
 import { RolesGuard } from "../common/guards/roles.guard"
+import { UserStatusGuard } from "../common/guards/user-status.guard"
 import { CurrentUser } from "../common/decorators/current-user.decorator"
 import { CreateWorkItemDto } from "./dto/create-work-item.dto"
 import { UpdateWorkItemDto } from "./dto/update-work-item.dto"
@@ -11,7 +12,7 @@ import { BlockWorkItemDto } from "./dto/block-work-item.dto"
 import type { JwtPayload } from "../common/types"
 
 @Controller("work-items")
-@UseGuards(AuthGuard("jwt"), RolesGuard)
+@UseGuards(AuthGuard("jwt"), RolesGuard, UserStatusGuard)
 export class WorkItemsController {
   constructor(private workItemsService: WorkItemsService) {}
 

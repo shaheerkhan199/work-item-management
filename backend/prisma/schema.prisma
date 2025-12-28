@@ -18,7 +18,7 @@ model User {
   firstName String
   lastName  String
   role      UserRole   @default(VIEWER)
-  active    Boolean    @default(true)
+  status    UserStatus @default(INACTIVE)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -32,6 +32,12 @@ enum UserRole {
   ADMIN
   OPERATOR
   VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 
 // Work Items table

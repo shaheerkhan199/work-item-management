@@ -1,5 +1,5 @@
 import client from "./client"
-import type { User, UserRole } from "../types"
+import type { User, UserRole, UserStatus } from "../types"
 
 export const usersAPI = {
   getCurrentUser: async () => {
@@ -14,6 +14,11 @@ export const usersAPI = {
 
   updateUserRole: async (userId: string, role: UserRole) => {
     const response = await client.patch<User>(`/users/${userId}/role`, { role })
+    return response.data
+  },
+
+  updateUserStatus: async (userId: string, status: UserStatus) => {
+    const response = await client.patch<User>(`/users/${userId}/status`, { status })
     return response.data
   },
 }

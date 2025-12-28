@@ -1,4 +1,5 @@
 export type UserRole = "ADMIN" | "OPERATOR" | "VIEWER"
+export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED"
 export type WorkItemState = "CREATED" | "IN_PROGRESS" | "IN_REVIEW" | "REWORK" | "COMPLETED"
 export type HistoryEventType = "CREATED" | "STATE_CHANGED" | "BLOCKED" | "UNBLOCKED" | "REWORK_INITIATED" | "UPDATED"
 
@@ -8,7 +9,7 @@ export interface User {
   firstName: string
   lastName: string
   role: UserRole
-  active?: boolean
+  status?: UserStatus
   createdAt?: string
 }
 

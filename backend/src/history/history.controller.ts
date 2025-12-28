@@ -3,11 +3,12 @@ import { AuthGuard } from "@nestjs/passport"
 import { HistoryService } from "./history.service"
 import { Roles } from "../common/decorators/roles.decorator"
 import { RolesGuard } from "../common/guards/roles.guard"
+import { UserStatusGuard } from "../common/guards/user-status.guard"
 import { CurrentUser } from "../common/decorators/current-user.decorator"
 import type { JwtPayload } from "../common/types"
 
 @Controller("history")
-@UseGuards(AuthGuard("jwt"), RolesGuard)
+@UseGuards(AuthGuard("jwt"), RolesGuard, UserStatusGuard)
 export class HistoryController {
   constructor(private historyService: HistoryService) {}
 
